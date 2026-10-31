@@ -71,7 +71,7 @@ class Vec3AndDistanceTest {
     }
 
     @Test
-    fun `Vec3 ops: add, dot, cross, normalize`() {
+    fun `Vec3 ops add dot cross normalize`() {
         val v = Vec3(1.0, 0.0, 0.0)
         val w = Vec3(0.0, 1.0, 0.0)
         assertEquals(Vec3(1.0, 1.0, 0.0), v + w)

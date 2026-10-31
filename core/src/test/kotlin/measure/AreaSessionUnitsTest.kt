@@ -108,7 +108,8 @@ class AreaSessionUnitsTest {
         assertEquals(2, session.anchors.size)
         assertTrue(session.undo())
         assertEquals(1, session.anchors.size)
-        assertFalse(session.undo())
+        assertTrue(session.undo())
+        assertEquals(0, session.anchors.size)
         assertFalse(session.undo())
     }
 
