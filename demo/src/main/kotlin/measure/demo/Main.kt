@@ -21,6 +21,10 @@ fun main(args: Array<String>) {
         runArDemo(unit)
         return
     }
+    if (args.contains("--history")) {
+        runHistoryDemo(unit)
+        return
+    }
     val session = MeasurementSession()
     // A 4.20 m x 3.10 m room, corners on the floor plane (y = 0).
     val corners = listOf(
