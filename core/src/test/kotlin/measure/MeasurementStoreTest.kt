@@ -1,6 +1,7 @@
 package measure
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -32,6 +33,32 @@ class MeasurementStoreTest {
         assertTrue(json.startsWith("{\"version\":1,\"measurements\":["))
         assertTrue(json.endsWith("]}"))
         assertEquals(1, json.split("\"id\":\"room\"").size - 1)
+    }
+
+    @Test
+    fun `decode round-trips encode exactly, including escapes`() {
+        val original = room()
+        val decoded = decodeHistory(encodeHistory(listOf(original)))
+        assertEquals(listOf(original), decoded)
+        assertEquals("Living \"room\" \\ corner", decoded[0].name)
+        assertEquals("line1\nline2", decoded[0].note)
+        assertEquals("south-west", decoded[0].anchors[0].label)
+    }
+
+    @Test
+    fun `decode rejects unknown versions, bad json and missing fields`() {
+        assertThrows<IllegalArgumentException> {
+            decodeHistory("{\"version\":2,\"measurements\":[]}")
+        }
+        assertThrows<IllegalArgumentException> {
+            decodeHistory("{\"version\":1,\"measurements\":[")
+        }
+        assertThrows<IllegalArgumentException> {
+            decodeHistory("{\"version\":1,\"measurements\":[{\"id\":\"x\"}]}")
+        }
+        assertThrows<IllegalArgumentException> {
+            decodeHistory("{\"version\":1,\"measurements\":[]} trailing")
+        }
     }
 
     @Test
