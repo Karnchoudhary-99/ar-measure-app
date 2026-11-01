@@ -17,6 +17,10 @@ import measure.formatLength
  */
 fun main(args: Array<String>) {
     val unit = if (args.contains("--feet")) LengthUnit.FEET else LengthUnit.METRES
+    if (args.contains("--ar")) {
+        runArDemo(unit)
+        return
+    }
     val session = MeasurementSession()
     // A 4.20 m x 3.10 m room, corners on the floor plane (y = 0).
     val corners = listOf(
