@@ -35,12 +35,31 @@ else changes.
   so a table occludes the wall behind it; a tap past a plane's edge or
   a duplicate of the previous anchor is a miss, not a bad point
 
+## Measurement history + saved measurements
+
+- **SavedMeasurement**: a named, timestamped snapshot of a session's
+  anchors, frozen at record time — later session edits (undo, new
+  points) never rewrite it. Derived length, perimeter and area are
+  recomputed from the snapshot, exactly as the live session computes
+  them.
+- **MeasurementHistory**: in-memory list, newest first. Recording under
+  an existing id replaces it (re-measuring a room updates it, it does
+  not duplicate it); remove, rename and case-insensitive search over
+  name and note round it out.
+- **Persistence**: one versioned JSON file (`MeasurementStore`), no
+  third-party dependency. Saves are atomic (temp file + move), a
+  missing file loads as an empty history (first run), and a corrupt
+  file throws instead of silently wiping saved rooms. On Android this
+  store is swapped for on-device storage; the history API does not
+  change.
+
 ## Demo (JVM, no device needed)
 
 ```sh
 gradle :demo:run --no-daemon
 # or: gradle :demo:run --no-daemon --args="--feet"
 # or: gradle :demo:run --no-daemon --args="--ar"
+# or: gradle :demo:run --no-daemon --args="--history"
 ```
 
 Simulates four anchors on a 4.20 m × 3.10 m room floor and prints the
@@ -53,7 +72,8 @@ floor disc that misses.
 ## Layout
 
 - `core/` — `measure` package: `Vec3`, `Anchor`, distance/path/angle,
-  polygon area/perimeter, units/formatting, `MeasurementSession`
+  polygon area/perimeter, units/formatting, `MeasurementSession`,
+  `SavedMeasurement`, `MeasurementHistory`, `MeasurementStore`
 - `demo/` — JVM CLI demo (`measure.demo.MainKt`)
 
 ## Roadmap
@@ -61,7 +81,7 @@ floor disc that misses.
 - [x] Project scaffold (README roadmap, license, gitignore)
 - [x] Measurement core (3D point math, distance/area from AR anchors)
 - [x] Camera + AR session (plane detection, point placement)
-- [ ] Measurement history + saved measurements
+- [x] Measurement history + saved measurements
 - [ ] Self-review checklist, then public
 
 ## License
