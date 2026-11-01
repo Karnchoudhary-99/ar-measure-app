@@ -82,7 +82,7 @@ floor disc that misses.
 - [x] Measurement core (3D point math, distance/area from AR anchors)
 - [x] Camera + AR session (plane detection, point placement)
 - [x] Measurement history + saved measurements
-- [ ] Self-review checklist, then public
+- [x] Self-review checklist, then public
 
 ## License
 
