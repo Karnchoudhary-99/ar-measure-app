@@ -48,6 +48,25 @@ class HistoryTest {
     }
 
     @Test
+    fun `remove and rename manage entries`() {
+        val history = MeasurementHistory()
+        val session = roomSession()
+        history.record(session, "room", "Living room", createdAtMillis = 1000L)
+        assertTrue(history.rename("room", "Lounge"))
+        assertEquals("Lounge", history.get("room")!!.name)
+        assertEquals(4, history.get("room")!!.anchors.size)
+        assertTrue(history.remove("room"))
+        assertTrue(history.isEmpty())
+    }
+
+    @Test
+    fun `remove and rename report false for unknown ids`() {
+        val history = MeasurementHistory()
+        assertTrue(!history.remove("missing"))
+        assertTrue(!history.rename("missing", "Nope"))
+    }
+
+    @Test
     fun `get returns null for an unknown id`() {
         assertNull(MeasurementHistory().get("missing"))
         assertTrue(MeasurementHistory().isEmpty())

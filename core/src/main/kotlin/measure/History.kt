@@ -57,4 +57,24 @@ class MeasurementHistory {
         entries += saved
         return saved
     }
+
+    /** Remove the entry with [id]; false when there is none. */
+    fun remove(id: String): Boolean = entries.removeAll { it.id == id }
+
+    /**
+     * Rename the entry with [id]; false when there is none. Renaming
+     * keeps the id, anchors and timestamp — only the display name changes.
+     */
+    fun rename(id: String, newName: String): Boolean {
+        require(newName.isNotBlank()) { "new name must not be blank" }
+        val index = entries.indexOfFirst { it.id == id }
+        if (index < 0) return false
+        entries[index] = entries[index].copy(name = newName)
+        return true
+    }
+
+    /** Remove every saved measurement. */
+    fun clear() {
+        entries.clear()
+    }
 }
