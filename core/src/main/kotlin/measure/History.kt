@@ -77,4 +77,18 @@ class MeasurementHistory {
     fun clear() {
         entries.clear()
     }
+
+    /**
+     * Measurements whose name or note contains [query] (case-insensitive),
+     * newest first. A blank query returns everything — the history screen's
+     * unfiltered list is just a search with no text.
+     */
+    fun search(query: String): List<SavedMeasurement> {
+        val needle = query.trim().lowercase()
+        if (needle.isEmpty()) return all()
+        return all().filter { entry ->
+            entry.name.lowercase().contains(needle) ||
+                (entry.note?.lowercase()?.contains(needle) ?: false)
+        }
+    }
 }

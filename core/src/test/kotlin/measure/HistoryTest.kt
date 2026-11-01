@@ -67,6 +67,18 @@ class HistoryTest {
     }
 
     @Test
+    fun `search matches name or note case-insensitively, blank returns all`() {
+        val history = MeasurementHistory()
+        val session = roomSession()
+        history.record(session, "room", "Living room", note = "for the new sofa", createdAtMillis = 1000L)
+        history.record(session, "desk", "Desk corner", createdAtMillis = 2000L)
+        assertEquals(listOf("room"), history.search("SOFA").map { it.id })
+        assertEquals(listOf("room"), history.search("living").map { it.id })
+        assertEquals(emptyList(), history.search("kitchen").map { it.id })
+        assertEquals(2, history.search("  ").size)
+    }
+
+    @Test
     fun `get returns null for an unknown id`() {
         assertNull(MeasurementHistory().get("missing"))
         assertTrue(MeasurementHistory().isEmpty())
