@@ -1,5 +1,10 @@
 package measure
 
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+
 /**
  * Persistence for [MeasurementHistory]: one JSON file, versioned so a
  * future format can migrate instead of crashing on old files.
@@ -255,6 +260,38 @@ internal fun decodeMeasurement(value: JsonValue): SavedMeasurement {
  * callers treat that as "this file is not a usable history", never as
  * an empty history.
  */
+/**
+ * Save [measurements] to [path], writing to a temp file in the same
+ * directory and moving it into place, so a crash mid-save leaves either
+ * the old file or the new one — never a half-written history.
+ */
+fun saveHistory(path: Path, measurements: List<SavedMeasurement>) {
+    val parent = path.parent ?: Path.of(".")
+    Files.createDirectories(parent)
+    val temp = Files.createTempFile(parent, path.fileName.toString(), ".tmp")
+    try {
+        Files.writeString(temp, encodeHistory(measurements))
+        try {
+            Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+        } catch (e: AtomicMoveNotSupportedException) {
+            Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING)
+        }
+    } finally {
+        Files.deleteIfExists(temp)
+    }
+}
+
+/**
+ * Load the history at [path], or an empty list when the file does not
+ * exist yet (first run). A present-but-corrupt file throws
+ * [IllegalArgumentException] from [decodeHistory] — it is not silently
+ * treated as empty, because that would destroy the user's saved rooms.
+ */
+fun loadHistory(path: Path): List<SavedMeasurement> {
+    if (!Files.exists(path)) return emptyList()
+    return decodeHistory(Files.readString(path))
+}
+
 internal fun decodeHistory(json: String): List<SavedMeasurement> {
     val doc = JsonParser(json).parseDocument() as? JsonValue.Obj
         ?: throw IllegalArgumentException("history document must be an object")

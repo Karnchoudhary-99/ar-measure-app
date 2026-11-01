@@ -62,6 +62,25 @@ class MeasurementStoreTest {
     }
 
     @Test
+    fun `save then load round-trips through a real file`() {
+        val dir = java.nio.file.Files.createTempDirectory("ar-measure-history")
+        val path = dir.resolve("history.json")
+        saveHistory(path, listOf(room()))
+        assertEquals(listOf(room()), loadHistory(path))
+        // No temp files left behind by the atomic move.
+        assertEquals(listOf("history.json"), dir.toFile().list()!!.toList())
+    }
+
+    @Test
+    fun `load of a missing file is empty, corrupt file throws`() {
+        val dir = java.nio.file.Files.createTempDirectory("ar-measure-history")
+        assertEquals(emptyList(), loadHistory(dir.resolve("missing.json")))
+        val corrupt = dir.resolve("corrupt.json")
+        java.nio.file.Files.writeString(corrupt, "{\"version\":1,")
+        assertThrows<IllegalArgumentException> { loadHistory(corrupt) }
+    }
+
+    @Test
     fun `encodeHistory of an empty list is a valid empty document`() {
         assertEquals(
             "{\"version\":1,\"measurements\":[]}",
